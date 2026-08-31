@@ -1,8 +1,5 @@
 const mysql = require('mysql2');
 
-// DB_SSL=true enables TLS (needed for most managed cloud MySQL providers,
-// e.g. Aiven). DB_PORT lets you point at a non-default port, which cloud
-// providers usually assign randomly.
 const useSsl = process.env.DB_SSL === 'true';
 
 const pool = mysql.createPool({
