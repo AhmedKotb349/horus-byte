@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UHIS Prototype — بوابة تدريبية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red:#a6192e;
+    --red-dark:#7d1122;
+    --gold:#b08d3d;
+    --gold-light:#e4cf9a;
+    --ink:#20201d;
+    --ink-dim:#655f52;
+    --paper:#faf8f3;
+    --panel:#ffffff;
+    --line:#e4ded0;
+    --teal:#0f5c53;
+    --teal-bg:#e7f2ef;
+    --danger-bg:#fbeaea;
+    --warn-bg:#fff4e0;
+    --warn-border:#e8b84b;
+    --mono:'JetBrains Mono', monospace;
+    --display:'Cairo', sans-serif;
+    --body:'IBM Plex Sans Arabic', sans-serif;
+    --radius:8px;
+  }
+  html[data-theme="dark"]{
+    --ink:#efe9db;
+    --ink-dim:#b3a996;
+    --paper:#15130f;
+    --panel:#1d1a15;
+    --line:#332e24;
+    --teal-bg:#123632;
+    --danger-bg:#3a1a1a;
+    --warn-bg:#3a2d10;
+    --warn-border:#8a6a20;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0; padding:0;}
+  body{
+    background-color:var(--paper);
+    background-image:radial-gradient(circle at 1px 1px, rgba(160,25,46,0.06) 1px, transparent 0);
+    background-size:22px 22px;
+    color:var(--ink);
+    font-family:var(--body);
+    min-height:100vh;
+    transition:background-color .2s ease, color .2s ease;
+  }
+  a{color:inherit;}
+  button{font-family:var(--body); cursor:pointer;}
+  :focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
+
+  .disclaimer-bar{
+    background:var(--warn-bg); border-bottom:2px solid var(--warn-border);
+    padding:9px 24px; text-align:center; font-size:12.5px; color:var(--ink); font-weight:600;
+  }
+  html[data-theme="dark"] .disclaimer-bar{color:#e8cf8a;}
+  .disclaimer-bar .en{font-family:var(--mono); font-weight:400; opacity:0.85; margin-inline-start:8px;}
+
+  .top-strip{
+    background:var(--ink); color:var(--paper); font-family:var(--mono); font-size:11px;
+    letter-spacing:0.04em; padding:6px 24px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:4px;
+  }
+
+  header.main{
+    background:var(--panel); border-bottom:3px solid var(--red);
+    padding:16px 24px; display:flex; align-items:center; justify-content:space-between;
+    flex-wrap:wrap; gap:14px;
+  }
+  .brand{display:flex; align-items:center; gap:14px;}
+  .emblem{
+    width:44px; height:44px; flex-shrink:0; object-fit:cover; border-radius:8px;
+    border:1px solid var(--line);
+  }
+  .brand-text .title{font-family:var(--display); font-weight:800; font-size:18px; color:var(--ink);}
+  .brand-text .sub{font-size:12px; color:var(--ink-dim); margin-top:2px;}
+
+  .header-right{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+
+  .toolbar{display:flex; align-items:center; gap:6px;}
+  .toggle-btn{
+    background:none; border:1px solid var(--line); border-radius:6px; padding:7px 11px;
+    font-size:13px; color:var(--ink); font-family:var(--mono); font-weight:600;
+  }
+  .toggle-btn:hover{border-color:var(--gold); background:var(--warn-bg);}
+
+  nav.main-nav{display:flex; align-items:center; gap:6px; font-size:14px; flex-wrap:wrap;}
+  nav.main-nav button.nav-link{
+    background:none; border:1px solid transparent; padding:8px 14px; border-radius:6px;
+    color:var(--ink); font-weight:600; font-size:14px; font-family:var(--body);
+  }
+  nav.main-nav button.nav-link.active{background:var(--red); color:#fff;}
+  nav.main-nav button.nav-link:not(.active):hover{border-color:var(--line); background:var(--warn-bg);}
+  #user-chip{
+    display:flex; align-items:center; gap:10px; font-size:13px; color:var(--ink-dim);
+    border-inline-start:1px solid var(--line); padding-inline-start:14px; margin-inline-start:6px; flex-wrap:wrap;
+  }
+  #user-chip b{color:var(--ink);}
+  .role-badge{
+    font-family:var(--mono); font-size:10px; padding:2px 8px; border-radius:20px;
+    background:var(--gold-light); color:#6b4f18; text-transform:uppercase; letter-spacing:0.05em;
+  }
+  .session-timer{
+    font-family:var(--mono); font-size:11px; color:var(--teal); display:flex; align-items:center; gap:5px;
+  }
+  .session-timer::before{content:''; width:6px; height:6px; border-radius:50%; background:var(--teal); animation:pulse 1.6s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+  #logout-btn{background:none; border:1px solid var(--line); border-radius:6px; padding:6px 10px; font-size:12px; color:var(--ink-dim);}
+
+  main{max-width:980px; margin:0 auto; padding:36px 24px 80px;}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .page-head{margin-bottom:26px; padding-bottom:18px; border-bottom:1px dashed var(--line);}
+  .eyebrow{
+    font-family:var(--mono); font-size:11px; letter-spacing:0.1em; color:var(--teal);
+    display:flex; align-items:center; gap:8px; margin-bottom:10px;
+  }
+  .eyebrow::before{content:''; width:7px; height:7px; background:var(--teal); border-radius:50%;}
+  h1.page-title{font-family:var(--display); font-weight:800; font-size:26px; margin:0 0 8px; color:var(--ink);}
+  .page-desc{color:var(--ink-dim); font-size:14px; line-height:1.8; max-width:600px;}
+
+  .panel{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+    padding:24px; margin-bottom:20px;
+  }
+  .panel h2.section-title{
+    font-family:var(--display); font-weight:700; font-size:16px; margin:0 0 16px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .panel h2.section-title::before{content:''; width:4px; height:16px; background:var(--red); border-radius:2px;}
+
+  label{display:block; font-size:12px; font-weight:600; color:var(--ink-dim); margin-bottom:6px;}
+  input[type=text], input[type=password], select, textarea{
+    width:100%; padding:11px 12px; border:1px solid var(--line); border-radius:6px;
+    font-family:var(--body); font-size:14px; background:var(--paper); color:var(--ink); margin-bottom:14px;
+  }
+  input[type=text]:focus, input[type=password]:focus, textarea:focus{border-color:var(--red);}
+  textarea{min-height:80px; resize:vertical;}
+
+  .btn{display:inline-block; border:none; border-radius:6px; padding:11px 22px; font-weight:700; font-size:14px;}
+  .btn-primary{background:var(--red); color:#fff;}
+  .btn-primary:hover{background:var(--red-dark);}
+  .btn-gold{background:var(--gold); color:#fff;}
+  .btn-outline{background:none; border:1px solid var(--line); color:var(--ink);}
+
+  .msg{font-size:13px; margin-top:8px;}
+  .msg.error{color:var(--red);}
+
+  .stats-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px;}
+  @media (max-width:760px){.stats-grid{grid-template-columns:repeat(2,1fr);}}
+  .stat-card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px; text-align:center;}
+  .stat-card .num{font-family:var(--display); font-weight:900; font-size:30px; color:var(--red);}
+  .stat-card .label{font-size:12px; color:var(--ink-dim); margin-top:4px;}
+
+  .gov-row{display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:13px;}
+  .gov-name{width:100px; flex-shrink:0; color:var(--ink-dim);}
+  .gov-bar-track{flex:1; height:10px; background:var(--paper); border-radius:6px; overflow:hidden; border:1px solid var(--line);}
+  .gov-bar-fill{height:100%; background:linear-gradient(90deg, var(--gold), var(--red));}
+  .gov-count{font-family:var(--mono); font-size:12px; color:var(--ink-dim); width:24px; text-align:end;}
+
+  .result-card{
+    border:1px solid var(--line); border-radius:6px; padding:14px 16px; margin-top:8px;
+    display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
+  }
+  .result-card.clickable{cursor:pointer;}
+  .result-card.clickable:hover{border-color:var(--gold); background:var(--warn-bg);}
+  .result-card .name{font-weight:700;}
+  .result-card .meta{font-family:var(--mono); font-size:12px; color:var(--ink-dim);}
+  .status-pill{font-family:var(--mono); font-size:11px; padding:3px 10px; border-radius:20px; font-weight:600;}
+  .status-active{background:var(--teal-bg); color:var(--teal);}
+  .status-pending{background:var(--gold-light); color:#6b4f18;}
+  .status-suspended{background:var(--danger-bg); color:var(--red);}
+  .gov-tag{font-family:var(--mono); font-size:11px; color:var(--ink-dim); border:1px solid var(--line); padding:2px 8px; border-radius:20px;}
+
+  .file-header{
+    display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;
+    border-bottom:1px solid var(--line); padding-bottom:16px; margin-bottom:16px;
+  }
+  .file-id-tag{font-family:var(--mono); font-size:12px; color:var(--ink-dim);}
+  .note{border-top:1px dashed var(--line); padding:12px 0; font-size:14px; line-height:1.8;}
+  .note:first-child{border-top:none;}
+  .note-type{font-family:var(--mono); font-size:10px; color:var(--teal); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px; display:block;}
+  .empty-state{color:var(--ink-dim); font-size:13px; padding:14px 0;}
+
+  footer{
+    border-top:1px solid var(--line); margin-top:40px; padding:20px 24px;
+    font-family:var(--mono); font-size:11px; color:var(--ink-dim); text-align:center; line-height:1.8;
+  }
+</style>
+</head>
+<body>
+
+<div class="disclaimer-bar">
+  ⚠️ <span data-i18n="disclaimer_ar">نموذج تدريبي شخصي لأغراض تعليمية فقط — غير تابع لأي جهة حكومية أو رسمية</span>
+  <span class="en">Personal student prototype for educational use only — not affiliated with any government entity</span>
+</div>
+
+<div class="top-strip">
+  <span data-i18n="top_strip_left">مشروع Horus Byte — بوابة تدريبية</span>
+  <span data-i18n="top_strip_right">إعداد أحمد قطب</span>
+</div>
+
+<header class="main">
+  <div class="brand">
+    <img class="emblem" src="/assets/logo.png" alt="Horus Byte logo">
+    <div class="brand-text">
+      <div class="title" data-i18n="brand_title">Horus Byte — بوابة تجريبية</div>
+      <div class="sub" data-i18n="brand_sub">من إعداد أحمد قطب · مشروع طلابي غير رسمي</div>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <div class="toolbar">
+      <button class="toggle-btn" id="theme-toggle" title="Toggle theme">🌙</button>
+      <button class="toggle-btn" id="lang-toggle" title="Toggle language">EN</button>
+    </div>
+
+    <nav class="main-nav" id="main-nav" style="display:none">
+      <button class="nav-link" data-view="dashboard" data-i18n="nav_dashboard">الرئيسية</button>
+      <button class="nav-link" data-view="search" data-i18n="nav_search">البحث</button>
+      <button class="nav-link" data-view="doctors" data-i18n="nav_doctors">الأطباء</button>
+      <span id="user-chip">
+        <span><span data-i18n="welcome_prefix">مرحبًا،</span> <b id="who-name"></b></span>
+        <span class="role-badge" id="who-role"></span>
+        <span class="session-timer"><span data-i18n="session_label">الجلسة:</span> <span id="session-timer">00:00:00</span></span>
+      </span>
+      <button id="logout-btn" data-i18n="logout_btn">خروج</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===================== LOGIN VIEW ===================== -->
+  <section class="view active" id="view-login">
+    <div class="page-head">
+      <div class="eyebrow" data-i18n="login_eyebrow">دخول آمن</div>
+      <h1 class="page-title" data-i18n="login_title">تسجيل الدخول إلى البوابة</h1>
+      <p class="page-desc" data-i18n="login_desc">استخدم الرقم القومي وكلمة المرور الخاصة بحسابك التجريبي. الحسابات ومعها كل البيانات وهمية بالكامل — راجع ملف CREDENTIALS.md.</p>
+    </div>
+    <div class="panel" style="max-width:420px">
+      <h2 class="section-title" data-i18n="login_section_title">بيانات الدخول</h2>
+      <label for="login-nid" data-i18n="login_nid_label">الرقم القومي</label>
+      <input type="text" id="login-nid" data-i18n-placeholder="nid_placeholder" placeholder="10 أرقام">
+      <label for="login-pass" data-i18n="login_pass_label">كلمة المرور</label>
+      <input type="password" id="login-pass" placeholder="••••••••">
+      <button class="btn btn-primary" style="width:100%" onclick="login()" data-i18n="login_btn">دخول</button>
+      <p class="msg error" id="login-msg"></p>
+    </div>
+  </section>
+
+  <!-- ===================== DASHBOARD VIEW ===================== -->
+  <section class="view" id="view-dashboard">
+    <div class="page-head">
+      <div class="eyebrow" data-i18n="dash_eyebrow">لوحة الخدمات</div>
+      <h1 class="page-title" data-i18n="dash_title">الرئيسية</h1>
+      <p class="page-desc" data-i18n="dash_desc">نظرة عامة على المنظومة التجريبية، مع إمكانية الوصول المباشر لأي ملف طبي برقمه.</p>
+    </div>
+
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card"><div class="num" id="stat-citizens">—</div><div class="label" data-i18n="stat_citizens_label">مواطن مسجّل</div></div>
+      <div class="stat-card"><div class="num" id="stat-doctors">—</div><div class="label" data-i18n="stat_doctors_label">طبيب</div></div>
+      <div class="stat-card"><div class="num" id="stat-active">—</div><div class="label" data-i18n="stat_active_label">حالة نشطة</div></div>
+      <div class="stat-card"><div class="num" id="stat-other">—</div><div class="label" data-i18n="stat_other_label">معلّقة / موقوفة</div></div>
+    </div>
+
+    <div class="panel">
+      <h2 class="section-title" data-i18n="gov_chart_title">توزيع الحالات حسب المحافظة</h2>
+      <div id="gov-chart"></div>
+    </div>
+
+    <div class="panel" id="my-patients-panel" style="display:none">
+      <h2 class="section-title" data-i18n="my_patients_title">ملفاتي (المرضى المسندون إليّ)</h2>
+      <div id="my-patients-list"></div>
+    </div>
+
+    <div class="panel">
+      <h2 class="section-title" data-i18n="direct_access_title">الوصول المباشر لملف طبي</h2>
+      <label for="file-id" data-i18n="file_id_label">رقم الملف</label>
+      <input type="text" id="file-id" data-i18n-placeholder="file_id_placeholder" placeholder="مثال: 1">
+      <button class="btn btn-gold" onclick="loadFile()" data-i18n="view_file_btn">عرض الملف</button>
+    </div>
+
+    <div class="panel" id="file-panel" style="display:none">
+      <div class="file-header">
+        <div>
+          <h2 class="section-title" style="margin-bottom:4px" data-i18n="file_section_title">ملف طبي</h2>
+          <span class="file-id-tag" id="file-tag"></span>
+        </div>
+        <span id="file-gov" class="status-pill status-active"></span>
+      </div>
+      <p id="file-diagnosis" style="font-size:14px; line-height:1.8;"></p>
+      <h3 style="font-family:var(--display); font-size:14px; margin:18px 0 6px;" data-i18n="notes_title">الملاحظات الطبية</h3>
+      <div id="notes-list"></div>
+
+      <div id="add-note-box" style="display:none; margin-top:18px; border-top:1px solid var(--line); padding-top:16px;">
+        <label for="note-text" data-i18n="add_note_label">إضافة ملاحظة طبية جديدة</label>
+        <textarea id="note-text" data-i18n-placeholder="note_placeholder" placeholder="اكتب الملاحظة..."></textarea>
+        <button class="btn btn-primary" onclick="addNote()" data-i18n="save_note_btn">حفظ الملاحظة</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SEARCH VIEW ===================== -->
+  <section class="view" id="view-search">
+    <div class="page-head">
+      <div class="eyebrow" data-i18n="search_eyebrow">استعلام</div>
+      <h1 class="page-title" data-i18n="search_title">البحث عن حالة تأمينية</h1>
+      <p class="page-desc" data-i18n="search_desc">أدخل الرقم القومي للاستعلام عن حالة التسجيل في المنظومة.</p>
+    </div>
+    <div class="panel">
+      <label for="search-nid" data-i18n="search_nid_label">الرقم القومي</label>
+      <input type="text" id="search-nid" data-i18n-placeholder="search_nid_placeholder" placeholder="أدخل الرقم القومي">
+      <button class="btn btn-primary" onclick="search()" data-i18n="search_btn">بحث</button>
+      <div id="search-results" style="margin-top:14px"></div>
+    </div>
+  </section>
+
+  <!-- ===================== DOCTORS VIEW ===================== -->
+  <section class="view" id="view-doctors">
+    <div class="page-head">
+      <div class="eyebrow" data-i18n="doctors_eyebrow">دليل</div>
+      <h1 class="page-title" data-i18n="doctors_title">الأطباء المسجّلون</h1>
+      <p class="page-desc" data-i18n="doctors_desc">قائمة الأطباء في المنظومة موزّعين حسب المحافظة.</p>
+    </div>
+    <div class="panel">
+      <label for="doctors-filter" data-i18n="doctors_filter_label">تصفية حسب المحافظة</label>
+      <input type="text" id="doctors-filter" data-i18n-placeholder="doctors_filter_placeholder" placeholder="اكتب اسم محافظة..." oninput="renderDoctors()">
+      <div id="doctors-list" style="margin-top:10px"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span data-i18n="footer_line1">بوابة تدريبية لأغراض اختبار الاختراق فقط — جميع البيانات وهمية بالكامل</span><br>
+  <span data-i18n="footer_line2">من إعداد أحمد قطب — مشروع تدريب في اختبار الاختراق وأمن التطبيقات</span>
+</footer>
+
+<script>
+// ============================================================
+// i18n
+// ============================================================
+const translations = {
+  ar: {
+    disclaimer_ar: 'نموذج تدريبي شخصي لأغراض تعليمية فقط — غير تابع لأي جهة حكومية أو رسمية',
+    top_strip_left: 'مشروع Horus Byte — بوابة تدريبية',
+    top_strip_right: 'إعداد أحمد قطب',
+    brand_title: 'Horus Byte — بوابة تجريبية',
+    brand_sub: 'من إعداد أحمد قطب · مشروع طلابي غير رسمي',
+    nav_dashboard: 'الرئيسية', nav_search: 'البحث', nav_doctors: 'الأطباء',
+    welcome_prefix: 'مرحبًا،', session_label: 'الجلسة:', logout_btn: 'خروج',
+    login_eyebrow: 'دخول آمن', login_title: 'تسجيل الدخول إلى البوابة',
+    login_desc: 'استخدم الرقم القومي وكلمة المرور الخاصة بحسابك التجريبي. الحسابات ومعها كل البيانات وهمية بالكامل — راجع ملف CREDENTIALS.md.',
+    login_section_title: 'بيانات الدخول', login_nid_label: 'الرقم القومي', login_pass_label: 'كلمة المرور', login_btn: 'دخول',
+    nid_placeholder: '10 أرقام',
+    dash_eyebrow: 'لوحة الخدمات', dash_title: 'الرئيسية',
+    dash_desc: 'نظرة عامة على المنظومة التجريبية، مع إمكانية الوصول المباشر لأي ملف طبي برقمه.',
+    stat_citizens_label: 'مواطن مسجّل', stat_doctors_label: 'طبيب', stat_active_label: 'حالة نشطة', stat_other_label: 'معلّقة / موقوفة',
+    gov_chart_title: 'توزيع الحالات حسب المحافظة',
+    my_patients_title: 'ملفاتي (المرضى المسندون إليّ)',
+    direct_access_title: 'الوصول المباشر لملف طبي', file_id_label: 'رقم الملف', file_id_placeholder: 'مثال: 1', view_file_btn: 'عرض الملف',
+    file_section_title: 'ملف طبي', notes_title: 'الملاحظات الطبية',
+    add_note_label: 'إضافة ملاحظة طبية جديدة', note_placeholder: 'اكتب الملاحظة...', save_note_btn: 'حفظ الملاحظة',
+    search_eyebrow: 'استعلام', search_title: 'البحث عن حالة تأمينية',
+    search_desc: 'أدخل الرقم القومي للاستعلام عن حالة التسجيل في المنظومة.',
+    search_nid_label: 'الرقم القومي', search_nid_placeholder: 'أدخل الرقم القومي', search_btn: 'بحث',
+    doctors_eyebrow: 'دليل', doctors_title: 'الأطباء المسجّلون',
+    doctors_desc: 'قائمة الأطباء في المنظومة موزّعين حسب المحافظة.',
+    doctors_filter_label: 'تصفية حسب المحافظة', doctors_filter_placeholder: 'اكتب اسم محافظة...',
+    footer_line1: 'بوابة تدريبية لأغراض اختبار الاختراق فقط — جميع البيانات وهمية بالكامل',
+    footer_line2: 'من إعداد أحمد قطب — مشروع تدريب في اختبار الاختراق وأمن التطبيقات',
+    no_results: 'لا توجد نتائج مطابقة.', no_notes: 'لا توجد ملاحظات على هذا الملف بعد.',
+    no_patients: 'لا يوجد مرضى مسندون إليك حاليًا.', no_doctors: 'لا يوجد أطباء مطابقون.',
+    file_no: 'رقم الملف:', theme_light: '☀️', theme_dark: '🌙',
+    role_citizen: 'مواطن', role_doctor: 'طبيب', role_admin: 'إداري',
+    status_active: 'نشطة', status_pending: 'معلّقة', status_suspended: 'موقوفة',
+    note_exam: 'فحص', note_diagnosis: 'تشخيص', note_follow_up: 'متابعة'
+  },
+  en: {
+    disclaimer_ar: 'Personal student prototype for educational use only — not affiliated with any government entity',
+    top_strip_left: 'Horus Byte project — training portal',
+    top_strip_right: 'By Ahmed Kotb',
+    brand_title: 'Horus Byte — Training Portal',
+    brand_sub: 'By Ahmed Kotb · Unofficial student project',
+    nav_dashboard: 'Dashboard', nav_search: 'Search', nav_doctors: 'Doctors',
+    welcome_prefix: 'Welcome,', session_label: 'Session:', logout_btn: 'Logout',
+    login_eyebrow: 'Secure Login', login_title: 'Sign in to the portal',
+    login_desc: 'Use the national ID and password for your training account. All accounts and data are entirely fictional — see CREDENTIALS.md.',
+    login_section_title: 'Login details', login_nid_label: 'National ID', login_pass_label: 'Password', login_btn: 'Log in',
+    nid_placeholder: '10 digits',
+    dash_eyebrow: 'Services Dashboard', dash_title: 'Dashboard',
+    dash_desc: 'An overview of the training system, with direct access to any medical file by ID.',
+    stat_citizens_label: 'Registered citizens', stat_doctors_label: 'Doctors', stat_active_label: 'Active cases', stat_other_label: 'Pending / suspended',
+    gov_chart_title: 'Case distribution by governorate',
+    my_patients_title: 'My Patients (assigned to me)',
+    direct_access_title: 'Direct access to a medical file', file_id_label: 'File ID', file_id_placeholder: 'e.g. 1', view_file_btn: 'View file',
+    file_section_title: 'Medical file', notes_title: 'Medical notes',
+    add_note_label: 'Add a new medical note', note_placeholder: 'Write the note...', save_note_btn: 'Save note',
+    search_eyebrow: 'Lookup', search_title: 'Search insurance case',
+    search_desc: 'Enter the national ID to look up the registration status.',
+    search_nid_label: 'National ID', search_nid_placeholder: 'Enter national ID', search_btn: 'Search',
+    doctors_eyebrow: 'Directory', doctors_title: 'Registered doctors',
+    doctors_desc: 'List of doctors in the system, grouped by governorate.',
+    doctors_filter_label: 'Filter by governorate', doctors_filter_placeholder: 'Type a governorate...',
+    footer_line1: 'Training portal for penetration testing practice only — all data is entirely fictional',
+    footer_line2: 'Built by Ahmed Kotb — Penetration Testing & Application Security training project',
+    no_results: 'No matching results.', no_notes: 'No notes on this file yet.',
+    no_patients: 'No patients currently assigned to you.', no_doctors: 'No matching doctors.',
+    file_no: 'File No.:', theme_light: '☀️', theme_dark: '🌙',
+    role_citizen: 'Citizen', role_doctor: 'Doctor', role_admin: 'Admin',
+    status_active: 'Active', status_pending: 'Pending', status_suspended: 'Suspended',
+    note_exam: 'Exam', note_diagnosis: 'Diagnosis', note_follow_up: 'Follow-up'
+  }
+};
+
+let currentLang = localStorage.getItem('lang') || 'ar';
+function t(key){ return (translations[currentLang] && translations[currentLang][key]) || key; }
+
+function applyLanguage(){
+  document.documentElement.lang = currentLang;
+  document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
+  document.getElementById('lang-toggle').textContent = currentLang === 'ar' ? 'EN' : 'AR';
+  // re-render dynamic widgets so their labels pick up the new language
+  if(window.currentUser){
+    if(window.currentUser.role === 'doctor') loadMyPatients();
+    loadGovChart();
+  }
+  if(allDoctors.length) renderDoctors();
+}
+
+document.getElementById('lang-toggle').addEventListener('click', () => {
+  currentLang = currentLang === 'ar' ? 'en' : 'ar';
+  localStorage.setItem('lang', currentLang);
+  applyLanguage();
+});
+
+// ============================================================
+// Theme
+// ============================================================
+let currentTheme = localStorage.getItem('theme') || 'light';
+function applyTheme(){
+  document.documentElement.dataset.theme = currentTheme;
+  document.getElementById('theme-toggle').textContent = currentTheme === 'light' ? '🌙' : '☀️';
+}
+document.getElementById('theme-toggle').addEventListener('click', () => {
+  currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+  localStorage.setItem('theme', currentTheme);
+  applyTheme();
+});
+
+// ============================================================
+// Session timer
+// ============================================================
+let sessionStart = null;
+let sessionInterval = null;
+function startSessionTimer(){
+  sessionStart = Date.now();
+  if(sessionInterval) clearInterval(sessionInterval);
+  sessionInterval = setInterval(updateSessionTimer, 1000);
+  updateSessionTimer();
+}
+function updateSessionTimer(){
+  const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
+  const h = String(Math.floor(elapsed / 3600)).padStart(2,'0');
+  const m = String(Math.floor((elapsed % 3600) / 60)).padStart(2,'0');
+  const s = String(elapsed % 60).padStart(2,'0');
+  const el = document.getElementById('session-timer');
+  if(el) el.textContent = h + ':' + m + ':' + s;
+}
+
+// ============================================================
+// App state / navigation
+// ============================================================
+window.currentUser = null;
+let currentFileId = null;
+let allDoctors = [];
+
+function showView(name){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelectorAll('#main-nav button[data-view]').forEach(b => {
+    b.classList.toggle('active', b.dataset.view === name);
+  });
+  location.hash = name;
+  if(name === 'doctors' && allDoctors.length === 0) loadDoctors();
+}
+
+document.querySelectorAll('#main-nav button[data-view]').forEach(b => {
+  b.addEventListener('click', () => showView(b.dataset.view));
+});
+
+async function login(){
+  const national_id = document.getElementById('login-nid').value;
+  const password = document.getElementById('login-pass').value;
+  const res = await fetch('/api/login', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({national_id, password})
+  });
+  const data = await res.json();
+  const msg = document.getElementById('login-msg');
+  if(res.ok){
+    msg.innerText = '';
+    onLoggedIn(data.user);
+  } else {
+    msg.innerText = data.error;
+  }
+}
+
+function onLoggedIn(user){
+  window.currentUser = user;
+  document.getElementById('main-nav').style.display = 'flex';
+  document.getElementById('who-name').innerText = user.full_name;
+  document.getElementById('who-role').innerText = t('role_' + user.role);
+  if(user.role === 'doctor'){
+    document.getElementById('add-note-box').style.display = 'block';
+    document.getElementById('my-patients-panel').style.display = 'block';
+    loadMyPatients();
+  }
+  showView(location.hash ? location.hash.slice(1) : 'dashboard');
+  loadStats();
+  loadGovChart();
+  startSessionTimer();
+}
+
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  await fetch('/api/logout', {method:'POST'});
+  location.reload();
+});
+
+async function loadStats(){
+  const res = await fetch('/api/stats');
+  if(!res.ok) return;
+  const s = await res.json();
+  document.getElementById('stat-citizens').innerText = s.citizens;
+  document.getElementById('stat-doctors').innerText = s.doctors;
+  document.getElementById('stat-active').innerText = s.active_cases;
+  document.getElementById('stat-other').innerText = (s.pending_cases + s.suspended_cases);
+}
+
+async function loadGovChart(){
+  const res = await fetch('/api/stats/governorates');
+  if(!res.ok) return;
+  const rows = await res.json();
+  const max = Math.max(...rows.map(r => r.total), 1);
+  const box = document.getElementById('gov-chart');
+  box.innerHTML = '';
+  rows.forEach(r => {
+    const pct = Math.round((r.total / max) * 100);
+    const row = document.createElement('div');
+    row.className = 'gov-row';
+    row.innerHTML =
+      '<span class="gov-name">' + r.governorate + '</span>' +
+      '<div class="gov-bar-track"><div class="gov-bar-fill" style="width:' + pct + '%"></div></div>' +
+      '<span class="gov-count">' + r.total + '</span>';
+    box.appendChild(row);
+  });
+}
+
+async function loadMyPatients(){
+  const res = await fetch('/api/my-patients');
+  if(!res.ok) return;
+  const rows = await res.json();
+  const box = document.getElementById('my-patients-list');
+  if(rows.length === 0){
+    box.innerHTML = '<p class="empty-state">' + t('no_patients') + '</p>';
+    return;
+  }
+  box.innerHTML = '';
+  rows.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'result-card clickable';
+    card.onclick = () => { document.getElementById('file-id').value = p.id; loadFile(); window.scrollTo({top: document.getElementById('file-panel').offsetTop - 20, behavior:'smooth'}); };
+    card.innerHTML =
+      '<div><div class="name">' + p.full_name + '</div>' +
+      '<div class="meta">' + t('file_no') + ' ' + p.id + ' · ' + (p.diagnosis_summary||'') + '</div></div>' +
+      '<span class="gov-tag">' + p.governorate + '</span>';
+    box.appendChild(card);
+  });
+}
+
+async function loadDoctors(){
+  const res = await fetch('/api/doctors');
+  if(!res.ok) return;
+  allDoctors = await res.json();
+  renderDoctors();
+}
+
+function renderDoctors(){
+  const filter = (document.getElementById('doctors-filter').value || '').toLowerCase();
+  const box = document.getElementById('doctors-list');
+  const filtered = allDoctors.filter(d => d.governorate.toLowerCase().includes(filter));
+  if(filtered.length === 0){
+    box.innerHTML = '<p class="empty-state">' + t('no_doctors') + '</p>';
+    return;
+  }
+  box.innerHTML = '';
+  filtered.forEach(d => {
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    card.innerHTML =
+      '<div class="name">' + d.full_name + '</div>' +
+      '<span class="gov-tag">' + d.governorate + '</span>';
+    box.appendChild(card);
+  });
+}
+
+async function search(){
+  const nid = document.getElementById('search-nid').value;
+  const res = await fetch('/api/search?national_id=' + encodeURIComponent(nid));
+  const data = await res.json();
+  const box = document.getElementById('search-results');
+  box.innerHTML = '';
+
+  if(!res.ok){
+    box.innerHTML = '<p class="msg error">' + (data.error || 'Error') + (data.details ? ' — ' + data.details : '') + '</p>';
+    return;
+  }
+  if(!Array.isArray(data) || data.length === 0){
+    box.innerHTML = '<p class="empty-state">' + t('no_results') + '</p>';
+    return;
+  }
+  data.forEach(row => {
+    const statusClass = row.status === 'active' ? 'status-active' : (row.status === 'pending' ? 'status-pending' : 'status-suspended');
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    card.innerHTML =
+      '<div><div class="name">' + (row.full_name || '') + '</div>' +
+      '<div class="meta">' + (row.national_id || '') + ' · ' + (row.governorate || '') + '</div></div>' +
+      '<span class="status-pill ' + statusClass + '">' + t('status_' + row.status) + '</span>';
+    box.appendChild(card);
+  });
+}
+
+async function loadFile(){
+  const id = document.getElementById('file-id').value;
+  currentFileId = id;
+  const res = await fetch('/api/patient/' + id);
+  const data = await res.json();
+  const panel = document.getElementById('file-panel');
+
+  if(!res.ok){
+    panel.style.display = 'block';
+    panel.querySelector('.file-header').style.display = 'none';
+    document.getElementById('file-diagnosis').innerText = data.error;
+    document.getElementById('notes-list').innerHTML = '';
+    return;
+  }
+
+  panel.style.display = 'block';
+  panel.querySelector('.file-header').style.display = 'flex';
+  document.getElementById('file-tag').innerText = t('file_no') + ' ' + data.file.id;
+  document.getElementById('file-gov').innerText = data.file.governorate;
+  document.getElementById('file-diagnosis').innerText = data.file.diagnosis_summary || '';
+
+  const list = document.getElementById('notes-list');
+  if(data.notes.length === 0){
+    list.innerHTML = '<p class="empty-state">' + t('no_notes') + '</p>';
+  } else {
+    list.innerHTML = '';
+    data.notes.forEach(n => {
+      const div = document.createElement('div');
+      div.className = 'note';
+      const typeLabel = t('note_' + n.note_type) || n.note_type;
+
+      // FIXED — was rendered via string-concatenated innerHTML (Stored XSS
+      // sink). Now built as separate DOM nodes with textContent, so
+      // note_text is always treated as plain text, never as HTML markup.
+      const typeSpan = document.createElement('span');
+      typeSpan.className = 'note-type';
+      typeSpan.textContent = typeLabel;
+
+      const textNode = document.createTextNode(n.note_text);
+
+      div.appendChild(typeSpan);
+      div.appendChild(textNode);
+      list.appendChild(div);
+    });
+  }
+}
+
+async function addNote(){
+  const note_text = document.getElementById('note-text').value;
+  const res = await fetch('/api/patient/' + currentFileId + '/notes', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({note_text, note_type:'exam'})
+  });
+  if(res.ok){
+    document.getElementById('note-text').value = '';
+    loadFile();
+  }
+}
+
+// ============================================================
+// Boot
+// ============================================================
+applyTheme();
+applyLanguage();
+
+(async () => {
+  const res = await fetch('/api/me');
+  if(res.ok){
+    const user = await res.json();
+    onLoggedIn(user);
+  }
+})();
+</script>
+
+</body>
+</html>

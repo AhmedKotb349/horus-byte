@@ -1,0 +1,17 @@
+{
+  "name": "uhis-mini-portal",
+  "version": "1.0.0",
+  "description": "Egyptian Hunting Range - UHIS mini portal (intentionally vulnerable training app)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "mysql2": "^3.9.7",
+    "express-session": "^1.18.0",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
+    "express-rate-limit": "^7.4.0"
+  }
+}
